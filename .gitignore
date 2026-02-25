@@ -4,6 +4,7 @@ build/
 *.exe
 a.out
 cipher
+main
 
 # IDE / Editor
 .vscode/

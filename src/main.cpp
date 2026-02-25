@@ -4,7 +4,6 @@
 #include <cctype> // Required for isalpha, toupper, etc.
 
 using namespace std;
-
 // --- BASE CLASS (Defined only once!) ---
 class Cipher {
 protected:
