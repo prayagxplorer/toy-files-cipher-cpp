@@ -94,9 +94,9 @@ int main() {
     string in, out, k;
     
     while (true) {
-        cout << "\n1. Caesar Encrypt\n2. Caesar Decrypt\n5. Vigenere Encrypt\n6. Vigenere Decrypt\n7. Exit\nChoice: ";
+        cout << "\n1. Caesar Encrypt\n2. Caesar Decrypt\n3. Vigenere Encrypt\n4. Vigenere Decrypt\n5. Exit\nChoice: ";
         cin >> choice;
-        if (choice == 7) break;
+        if (choice == 5) break;
 
         cout << "Enter Input Filename: "; cin >> in;
         cout << "Enter Output Filename: "; cin >> out;
@@ -116,13 +116,13 @@ int main() {
                 myCipher->run(false);
                 break;
             }
-            case 5: {
+            case 3: {
                 cout << "Enter Keyword: "; cin >> k;
                 myCipher = new VigenereCipher(in, out, k);
                 myCipher->run(true);
                 break;
             }
-            case 6: {
+            case 4: {
                 cout << "Enter Keyword: "; cin >> k;
                 myCipher = new VigenereCipher(in, out, k);
                 myCipher->run(false);
