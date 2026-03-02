@@ -8,6 +8,6 @@ cipher
 # IDE / Editor
 .vscode/
 .idea/
-
+.cph/
 # OS files
 .DS_Store
