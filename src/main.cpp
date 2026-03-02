@@ -1,26 +1,47 @@
 #include <iostream>
-#include <fstream>
+#include <cstdio>  // Standard C File I/O
 #include <string>
-#include <cctype> // Required for isalpha, toupper, etc.
+#include <cctype>
 
 using namespace std;
 
-// --- BASE CLASS (Defined only once!) ---
+// --- BASE CLASS ---
 class Cipher {
 protected:
     string inputFileName;
     string outputFileName;
 
+    // Reading the file using C-style FILE pointers
     string readFile() {
-        ifstream inFile(inputFileName);
-        if (!inFile) return "";
-        return string((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
+        FILE* filePtr = fopen(inputFileName.c_str(), "r");
+        if (filePtr == NULL) {
+            printf("Error: Could not open input file.\n");
+            return "";
+        }
+
+        string content = "";
+        char ch;
+        // Read character by character until End Of File (EOF)
+        while ((ch = fgetc(filePtr)) != EOF) {
+            content += ch;
+        }
+
+        fclose(filePtr);
+        return content;
     }
 
+    // Writing the file using C-style FILE pointers
     void writeFile(string content) {
-        ofstream outFile(outputFileName);
-        if (outFile) outFile << content;
-        outFile.close();
+        FILE* filePtr = fopen(outputFileName.c_str(), "w");
+        if (filePtr == NULL) {
+            printf("Error: Could not open output file.\n");
+            return;
+        }
+
+        // fputs writes the entire string to the file
+        fputs(content.c_str(), filePtr);
+
+        fclose(filePtr);
     }
 
 public:
@@ -29,14 +50,17 @@ public:
     virtual void run(bool encryptMode) = 0; 
 };
 
-// --- CHILD CLASSES ---
+// --- CAESAR CHILD CLASS ---
 class CaesarCipher : public Cipher {
 private:
     int shift;
 public:
     CaesarCipher(string in, string out, int s) : Cipher(in, out), shift(s) {}
+
     void run(bool encryptMode) override {
         string data = readFile();
+        if (data.empty()) return;
+
         string result = "";
         int actualShift = encryptMode ? shift : (26 - (shift % 26));
 
@@ -49,10 +73,11 @@ public:
             }
         }
         writeFile(result);
-        cout << "Caesar Task Completed.\n";
+        printf("Caesar processing complete.\n");
     }
 };
 
+// --- VIGENERE CHILD CLASS ---
 class VigenereCipher : public Cipher {
 private:
     string key;
@@ -62,8 +87,10 @@ private:
         return temp;
     }
 public:
-    VigenereCipher(string in, string out, string k) : Cipher(in, out) { key = formatKey(k); }
-    
+    VigenereCipher(string in, string out, string k) : Cipher(in, out) {
+        key = formatKey(k);
+    }
+
     void run(bool encryptMode) override {
         string text = readFile();
         if (text.empty()) return;
@@ -86,7 +113,7 @@ public:
             }
         }
         writeFile(result);
-        cout << "Vigenere Task Completed.\n";
+        printf("Vigenere processing complete.\n");
     }
 };
 
@@ -95,7 +122,7 @@ int main() {
     string in, out, k;
     
     while (true) {
-        cout << "\n1. Caesar Encrypt\n2. Caesar Decrypt\n3. Vigenere Encrypt\n4. Vigenere Decrypt\n5. Exit\nChoice: ";
+        printf("\n1. Caesar Encrypt\n2. Caesar Decrypt\n3. Vigenere Encrypt\n4. Vigenere Decrypt\n5. Exit\nChoice: ");
         cin >> choice;
         if (choice == 5) break;
 
@@ -130,7 +157,7 @@ int main() {
                 break;
             }
         }
-        delete myCipher; // Clean up memory polymorphically
+        delete myCipher; 
     }
     return 0;
 }
