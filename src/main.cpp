@@ -1,59 +1,43 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cctype> // Required for isalpha, toupper, etc.
 
 using namespace std;
 
+// --- BASE CLASS (Defined only once!) ---
 class Cipher {
 protected:
     string inputFileName;
     string outputFileName;
 
-    // Helper to read the entire file into a string
     string readFile() {
         ifstream inFile(inputFileName);
-        if (!inFile) {
-            cout << "Error opening input file!" << endl;
-            return "";
-        }
-        string content((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
-        inFile.close();
-        return content;
+        if (!inFile) return "";
+        return string((istreambuf_iterator<char>(inFile)), istreambuf_iterator<char>());
     }
 
-    // Helper to write a string to the output file
     void writeFile(string content) {
         ofstream outFile(outputFileName);
-        if (!outFile) {
-            cout << "Error opening output file!" << endl;
-            return;
-        }
-        outFile << content;
+        if (outFile) outFile << content;
         outFile.close();
-        cout << "Task completed. Check: " << outputFileName << endl;
     }
 
 public:
     Cipher(string in, string out) : inputFileName(in), outputFileName(out) {}
     virtual ~Cipher() {}
-
-    // POLYMORPHISM: The "Workhorse" function
-    // This will be defined differently for every cipher
     virtual void run(bool encryptMode) = 0; 
 };
 
+// --- CHILD CLASSES ---
 class CaesarCipher : public Cipher {
 private:
-    int shift; // Encapsulated: specific to Caesar
-
+    int shift;
 public:
     CaesarCipher(string in, string out, int s) : Cipher(in, out), shift(s) {}
-
     void run(bool encryptMode) override {
         string data = readFile();
         string result = "";
-
-        // Adjust shift for decryption
         int actualShift = encryptMode ? shift : (26 - (shift % 26));
 
         for (char &c : data) {
@@ -65,40 +49,88 @@ public:
             }
         }
         writeFile(result);
+        cout << "Caesar Task Completed.\n";
+    }
+};
+
+class VigenereCipher : public Cipher {
+private:
+    string key;
+    string formatKey(string k) {
+        string temp = "";
+        for (char c : k) if (isalpha(c)) temp += toupper(c);
+        return temp;
+    }
+public:
+    VigenereCipher(string in, string out, string k) : Cipher(in, out) { key = formatKey(k); }
+    
+    void run(bool encryptMode) override {
+        string text = readFile();
+        if (text.empty()) return;
+
+        string result = "";
+        int keyIdx = 0;
+        int keyLen = key.length();
+
+        for (char c : text) {
+            if (isalpha(c)) {
+                char base = isupper(c) ? 'A' : 'a';
+                int shift = key[keyIdx % keyLen] - 'A';
+                if (encryptMode)
+                    result += (c - base + shift) % 26 + base;
+                else
+                    result += (c - base - shift + 26) % 26 + base;
+                keyIdx++;
+            } else {
+                result += c;
+            }
+        }
+        writeFile(result);
+        cout << "Vigenere Task Completed.\n";
     }
 };
 
 int main() {
     int choice;
-    string in, out;
+    string in, out, k;
     
     while (true) {
-        cout << "\n1. Caesar Encrypt\n2. Caesar Decrypt\n7. Exit\nChoice: ";
+        cout << "\n1. Caesar Encrypt\n2. Caesar Decrypt\n5. Vigenere Encrypt\n6. Vigenere Decrypt\n7. Exit\nChoice: ";
         cin >> choice;
         if (choice == 7) break;
 
         cout << "Enter Input Filename: "; cin >> in;
         cout << "Enter Output Filename: "; cin >> out;
 
-        Cipher* myCipher = nullptr; // Pointer for Polymorphism
+        Cipher* myCipher = nullptr; 
 
         switch (choice) {
             case 1: {
                 int s; cout << "Enter shift: "; cin >> s;
                 myCipher = new CaesarCipher(in, out, s);
-                myCipher->run(true); // Encrypt
+                myCipher->run(true);
                 break;
             }
             case 2: {
                 int s; cout << "Enter shift: "; cin >> s;
                 myCipher = new CaesarCipher(in, out, s);
-                myCipher->run(false); // Decrypt
+                myCipher->run(false);
                 break;
             }
-            // Add other ciphers here (Vigenere, Monoalphabetic)
+            case 5: {
+                cout << "Enter Keyword: "; cin >> k;
+                myCipher = new VigenereCipher(in, out, k);
+                myCipher->run(true);
+                break;
+            }
+            case 6: {
+                cout << "Enter Keyword: "; cin >> k;
+                myCipher = new VigenereCipher(in, out, k);
+                myCipher->run(false);
+                break;
+            }
         }
-
-        delete myCipher; // Clean up memory
+        delete myCipher; // Clean up memory polymorphically
     }
     return 0;
 }
