@@ -20,10 +20,12 @@ protected:
         }
 
         string content = "";
-        char ch;
+        int ch;
         // Read character by character until End Of File (EOF)
         while ((ch = fgetc(filePtr)) != EOF) {
-            content += ch;
+            string oneChar = "";
+            oneChar += static_cast<char>(ch);
+            content = content + oneChar;
         }
 
         fclose(filePtr);
@@ -57,19 +59,37 @@ private:
 public:
     CaesarCipher(string in, string out, int s) : Cipher(in, out), shift(s) {}
 
-    void run(bool encryptMode) override {
+    void run(bool encryptMode) {
         string data = readFile();
         if (data.empty()) return;
 
         string result = "";
         int actualShift = encryptMode ? shift : (26 - (shift % 26));
 
-        for (char &c : data) {
-            if (isalpha(c)) {
-                char base = isupper(c) ? 'A' : 'a';
-                result += (c - base + actualShift) % 26 + base;
+        for (int i = 0; i < static_cast<int>(data.length()); i++) {
+            char c = data[i];
+            if (isalpha(static_cast<unsigned char>(c))) {
+                bool upper = isupper(static_cast<unsigned char>(c)) != 0;
+                char base;
+                if (upper) {
+                    base = 'A';
+                } else {
+                    base = 'a';
+                }
+
+                int normalized = c - base;
+                int moved = normalized + actualShift;
+                while (moved >= 26) {
+                    moved = moved - 26;
+                }
+                while (moved < 0) {
+                    moved = moved + 26;
+                }
+
+                char changed = static_cast<char>(base + moved);
+                result = result + changed;
             } else {
-                result += c;
+                result = result + c;
             }
         }
         writeFile(result);
@@ -83,7 +103,13 @@ private:
     string key;
     string formatKey(string k) {
         string temp = "";
-        for (char c : k) if (isalpha(c)) temp += toupper(c);
+        for (int i = 0; i < static_cast<int>(k.length()); i++) {
+            char c = k[i];
+            if (isalpha(static_cast<unsigned char>(c))) {
+                char up = static_cast<char>(toupper(static_cast<unsigned char>(c)));
+                temp = temp + up;
+            }
+        }
         return temp;
     }
 public:
@@ -91,25 +117,49 @@ public:
         key = formatKey(k);
     }
 
-    void run(bool encryptMode) override {
+    void run(bool encryptMode) {
         string text = readFile();
         if (text.empty()) return;
+        if (key.empty()) {
+            printf("Error: Keyword has no alphabetic characters.\n");
+            return;
+        }
 
         string result = "";
         int keyIdx = 0;
-        int keyLen = key.length();
+        int keyLen = static_cast<int>(key.length());
 
-        for (char c : text) {
-            if (isalpha(c)) {
-                char base = isupper(c) ? 'A' : 'a';
+        for (int i = 0; i < static_cast<int>(text.length()); i++) {
+            char c = text[i];
+            if (isalpha(static_cast<unsigned char>(c))) {
+                char base;
+                if (isupper(static_cast<unsigned char>(c))) {
+                    base = 'A';
+                } else {
+                    base = 'a';
+                }
                 int shift = key[keyIdx % keyLen] - 'A';
-                if (encryptMode)
-                    result += (c - base + shift) % 26 + base;
-                else
-                    result += (c - base - shift + 26) % 26 + base;
+
+                int current = c - base;
+                int moved;
+                if (encryptMode) {
+                    moved = current + shift;
+                } else {
+                    moved = current - shift;
+                }
+
+                while (moved >= 26) {
+                    moved = moved - 26;
+                }
+                while (moved < 0) {
+                    moved = moved + 26;
+                }
+
+                char outChar = static_cast<char>(base + moved);
+                result = result + outChar;
                 keyIdx++;
             } else {
-                result += c;
+                result = result + c;
             }
         }
         writeFile(result);
