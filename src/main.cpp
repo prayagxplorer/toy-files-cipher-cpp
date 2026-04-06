@@ -13,7 +13,7 @@ protected:
 
     // Reading the file using C-style FILE pointers
     string readFile() {
-        FILE* filePtr = fopen(inputFileName.c_str(), "r");
+        FILE* filePtr = fopen(inputFileName.c_str(), "rb");
         if (filePtr == NULL) {
             printf("Error: Could not open input file.\n");
             return "";
@@ -34,14 +34,15 @@ protected:
 
     // Writing the file using C-style FILE pointers
     void writeFile(string content) {
-        FILE* filePtr = fopen(outputFileName.c_str(), "w");
+        FILE* filePtr = fopen(outputFileName.c_str(), "wb");
         if (filePtr == NULL) {
             printf("Error: Could not open output file.\n");
             return;
         }
 
-        // fputs writes the entire string to the file
-        fputs(content.c_str(), filePtr);
+        for (int i = 0; i < static_cast<int>(content.length()); i++) {
+            fputc(static_cast<unsigned char>(content[i]), filePtr);
+        }
 
         fclose(filePtr);
     }
@@ -167,14 +168,48 @@ public:
     }
 };
 
+// --- XOR CHILD CLASS ---
+class XorCipher : public Cipher {
+private:
+    string key;
+public:
+    XorCipher(string in, string out, string k) : Cipher(in, out), key(k) {}
+
+    void run(bool encryptMode) {
+        string text = readFile();
+        if (text.empty()) return;
+        if (key.empty()) {
+            printf("Error: Key cannot be empty.\n");
+            return;
+        }
+
+        string result = "";
+        int keyLen = static_cast<int>(key.length());
+
+        for (int i = 0; i < static_cast<int>(text.length()); i++) {
+            unsigned char textChar = static_cast<unsigned char>(text[i]);
+            unsigned char keyChar = static_cast<unsigned char>(key[i % keyLen]);
+            char outChar = static_cast<char>(textChar ^ keyChar);
+            result = result + outChar;
+        }
+
+        writeFile(result);
+        if (encryptMode) {
+            printf("XOR encryption complete.\n");
+        } else {
+            printf("XOR decryption complete.\n");
+        }
+    }
+};
+
 int main() {
     int choice;
     string in, out, k;
     
     while (true) {
-        printf("\n1. Caesar Encrypt\n2. Caesar Decrypt\n3. Vigenere Encrypt\n4. Vigenere Decrypt\n5. Exit\nChoice: ");
+        printf("\n1. Caesar Encrypt\n2. Caesar Decrypt\n3. Vigenere Encrypt\n4. Vigenere Decrypt\n5. XOR Encrypt\n6. XOR Decrypt\n7. Exit\nChoice: ");
         cin >> choice;
-        if (choice == 5) break;
+        if (choice == 7) break;
 
         cout << "Enter Input Filename: "; cin >> in;
         cout << "Enter Output Filename: "; cin >> out;
@@ -204,6 +239,22 @@ int main() {
                 cout << "Enter Keyword: "; cin >> k;
                 myCipher = new VigenereCipher(in, out, k);
                 myCipher->run(false);
+                break;
+            }
+            case 5: {
+                cout << "Enter Key: "; cin >> k;
+                myCipher = new XorCipher(in, out, k);
+                myCipher->run(true);
+                break;
+            }
+            case 6: {
+                cout << "Enter Key: "; cin >> k;
+                myCipher = new XorCipher(in, out, k);
+                myCipher->run(false);
+                break;
+            }
+            default: {
+                printf("Invalid choice.\n");
                 break;
             }
         }
