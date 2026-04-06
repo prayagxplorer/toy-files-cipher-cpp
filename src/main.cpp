@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <cctype> // Required for isalpha, toupper, etc.
+#include <cctype>
 
 using namespace std;
 // --- BASE CLASS (Defined only once!) ---
@@ -89,14 +89,41 @@ public:
     }
 };
 
+class XORCipher : public Cipher {
+private:
+    string key;
+public:
+    XORCipher(string in, string out, string k) : Cipher(in, out), key(k) {}
+
+    void run(bool encryptMode) {
+        string text = readFile();
+        if (text.empty() || key.empty()) return;
+
+        string result = "";
+        int keyLen = key.length();
+
+        for (int i = 0; i < text.length(); i++) {
+            char newChar = text[i] ^ key[i % keyLen];
+            result += newChar;
+        }
+
+        writeFile(result);
+
+        if (encryptMode)
+            cout << "XOR Encryption Completed.\n";
+        else
+            cout << "XOR Decryption Completed.\n";
+    }
+};
+
 int main() {
     int choice;
     string in, out, k;
     
     while (true) {
-        cout << "\n1. Caesar Encrypt\n2. Caesar Decrypt\n3. Vigenere Encrypt\n4. Vigenere Decrypt\n5. Exit\nChoice: ";
+        cout << "\n1. Caesar Encrypt\n2. Caesar Decrypt\n3. Vigenere Encrypt\n4. Vigenere Decrypt\n5. XOR Encrypt\n6. XOR Decrypt\n7. Exit\nChoice: ";
         cin >> choice;
-        if (choice == 5) break;
+        if (choice == 7) break;
 
         cout << "Enter Input Filename: "; cin >> in;
         cout << "Enter Output Filename: "; cin >> out;
@@ -125,6 +152,18 @@ int main() {
             case 4: {
                 cout << "Enter Keyword: "; cin >> k;
                 myCipher = new VigenereCipher(in, out, k);
+                myCipher->run(false);
+                break;
+            }
+            case 5: {
+                cout << "Enter Keyword: "; cin >> k;
+                myCipher = new XORCipher(in, out, k);
+                myCipher->run(true);
+                break;
+            }
+            case 6: {
+                cout << "Enter Keyword: "; cin >> k;
+                myCipher = new XORCipher(in, out, k);
                 myCipher->run(false);
                 break;
             }
