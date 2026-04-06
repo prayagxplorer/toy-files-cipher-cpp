@@ -34,7 +34,7 @@ private:
     int shift;
 public:
     CaesarCipher(string in, string out, int s) : Cipher(in, out), shift(s) {}
-    void run(bool encryptMode) override {
+    void run(bool encryptMode) {
         string data = readFile();
         string result = "";
         int actualShift = encryptMode ? shift : (26 - (shift % 26));
@@ -63,7 +63,7 @@ private:
 public:
     VigenereCipher(string in, string out, string k) : Cipher(in, out) { key = formatKey(k); }
     
-    void run(bool encryptMode) override {
+    void run(bool encryptMode) {
         string text = readFile();
         if (text.empty()) return;
 
