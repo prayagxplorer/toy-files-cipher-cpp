@@ -24,7 +24,7 @@ protected:
         // Read character by character until End Of File (EOF)
         while ((ch = fgetc(filePtr)) != EOF) {
             string oneChar = "";
-            oneChar += static_cast<char>(ch);
+            oneChar += (char)ch;
             content = content + oneChar;
         }
 
@@ -40,8 +40,8 @@ protected:
             return;
         }
 
-        for (int i = 0; i < static_cast<int>(content.length()); i++) {
-            fputc(static_cast<unsigned char>(content[i]), filePtr);
+        for (int i = 0; i < (int)content.length(); i++) {
+            fputc((unsigned char)content[i], filePtr);
         }
 
         fclose(filePtr);
@@ -67,10 +67,10 @@ public:
         string result = "";
         int actualShift = encryptMode ? shift : (26 - (shift % 26));
 
-        for (int i = 0; i < static_cast<int>(data.length()); i++) {
+        for (int i = 0; i < (int)data.length(); i++) {
             char c = data[i];
-            if (isalpha(static_cast<unsigned char>(c))) {
-                bool upper = isupper(static_cast<unsigned char>(c)) != 0;
+            if (isalpha((unsigned char)c)) {
+                bool upper = isupper((unsigned char)c) != 0;
                 char base;
                 if (upper) {
                     base = 'A';
@@ -87,7 +87,7 @@ public:
                     moved = moved + 26;
                 }
 
-                char changed = static_cast<char>(base + moved);
+                char changed = (char)(base + moved);
                 result = result + changed;
             } else {
                 result = result + c;
@@ -104,10 +104,10 @@ private:
     string key;
     string formatKey(string k) {
         string temp = "";
-        for (int i = 0; i < static_cast<int>(k.length()); i++) {
+        for (int i = 0; i < (int)k.length(); i++) {
             char c = k[i];
-            if (isalpha(static_cast<unsigned char>(c))) {
-                char up = static_cast<char>(toupper(static_cast<unsigned char>(c)));
+            if (isalpha((unsigned char)c)) {
+                char up = (char)toupper((unsigned char)c);
                 temp = temp + up;
             }
         }
@@ -128,13 +128,13 @@ public:
 
         string result = "";
         int keyIdx = 0;
-        int keyLen = static_cast<int>(key.length());
+        int keyLen = (int)key.length();
 
-        for (int i = 0; i < static_cast<int>(text.length()); i++) {
+        for (int i = 0; i < (int)text.length(); i++) {
             char c = text[i];
-            if (isalpha(static_cast<unsigned char>(c))) {
+            if (isalpha((unsigned char)c)) {
                 char base;
-                if (isupper(static_cast<unsigned char>(c))) {
+                if (isupper((unsigned char)c)) {
                     base = 'A';
                 } else {
                     base = 'a';
@@ -156,7 +156,7 @@ public:
                     moved = moved + 26;
                 }
 
-                char outChar = static_cast<char>(base + moved);
+                char outChar = (char)(base + moved);
                 result = result + outChar;
                 keyIdx++;
             } else {
@@ -184,12 +184,12 @@ public:
         }
 
         string result = "";
-        int keyLen = static_cast<int>(key.length());
+        int keyLen = (int)key.length();
 
-        for (int i = 0; i < static_cast<int>(text.length()); i++) {
-            unsigned char textChar = static_cast<unsigned char>(text[i]);
-            unsigned char keyChar = static_cast<unsigned char>(key[i % keyLen]);
-            char outChar = static_cast<char>(textChar ^ keyChar);
+        for (int i = 0; i < (int)text.length(); i++) {
+            unsigned char textChar = (unsigned char)text[i];
+            unsigned char keyChar = (unsigned char)key[i % keyLen];
+            char outChar = (char)(textChar ^ keyChar);
             result = result + outChar;
         }
 
