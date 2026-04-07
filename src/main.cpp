@@ -92,32 +92,27 @@ public:
         for (int i = 0; i < (int)data.length(); i++) {
             char c = data[i];
             if (isalpha((unsigned char)c)) {
-                // Caesar only shifts letters. Case is preserved by choosing
-                // a different base for uppercase and lowercase characters.
-                bool upper = isupper((unsigned char)c) != 0;
-                char base;
-                if (upper) {
-                    base = 'A';
+                // Shift directly in the original ASCII letter range instead
+                // of first converting the character into a 0..25 index.
+                int moved = c + actualShift;
+
+                if (isupper((unsigned char)c)) {
+                    while (moved > 'Z') {
+                        moved = moved - 26;
+                    }
+                    while (moved < 'A') {
+                        moved = moved + 26;
+                    }
                 } else {
-                    base = 'a';
+                    while (moved > 'z') {
+                        moved = moved - 26;
+                    }
+                    while (moved < 'a') {
+                        moved = moved + 26;
+                    }
                 }
 
-                // Convert 'A'..'Z' or 'a'..'z' into a 0..25 range.
-                int normalized = c - base;
-                // Apply the shift in that 0..25 alphabet space.
-                int moved = normalized + actualShift;
-
-                // Wrap around the alphabet manually instead of using %.
-                // Example: shifting 'Z' by 1 should become 'A', not '['.
-                while (moved >= 26) {
-                    moved = moved - 26;
-                }
-                while (moved < 0) {
-                    moved = moved + 26;
-                }
-
-                // Convert back from 0..25 to an actual ASCII letter.
-                char changed = (char)(base + moved);
+                char changed = (char)moved;
                 result = result + changed;
             } else {
                 // Non-letter characters (spaces, punctuation, digits, etc.)
@@ -150,26 +145,27 @@ public:
         for (int i = 0; i < (int)data.length(); i++) {
             char c = data[i];
             if (isalpha((unsigned char)c)) {
-                bool upper = isupper((unsigned char)c) != 0;
-                char base;
-                if (upper) {
-                    base = 'A';
+                // Decryption uses the same direct-ASCII idea as encryption,
+                // but with the inverse shift already stored in actualShift.
+                int moved = c + actualShift;
+
+                if (isupper((unsigned char)c)) {
+                    while (moved > 'Z') {
+                        moved = moved - 26;
+                    }
+                    while (moved < 'A') {
+                        moved = moved + 26;
+                    }
                 } else {
-                    base = 'a';
+                    while (moved > 'z') {
+                        moved = moved - 26;
+                    }
+                    while (moved < 'a') {
+                        moved = moved + 26;
+                    }
                 }
 
-                int normalized = c - base;
-                int moved = normalized + actualShift;
-
-                // Wrap back into the valid alphabet range.
-                while (moved >= 26) {
-                    moved = moved - 26;
-                }
-                while (moved < 0) {
-                    moved = moved + 26;
-                }
-
-                char changed = (char)(base + moved);
+                char changed = (char)moved;
                 result = result + changed;
             } else {
                 result = result + c;
