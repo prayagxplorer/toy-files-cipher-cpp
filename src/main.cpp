@@ -24,7 +24,7 @@ protected:
         // Read character by character until End Of File (EOF)
         while ((ch = fgetc(filePtr)) != EOF) {
             string oneChar = "";
-            oneChar += (char)ch;
+            oneChar  = oneChar + (char)ch;
             content = content + oneChar;
         }
 
@@ -48,8 +48,8 @@ protected:
     }
 
 public:
-    Cipher(string in, string out) : inputFileName(in), outputFileName(out) {}
-    virtual ~Cipher() {}
+    Cipher(string in, string out) : inputFileName(in), outputFileName(out) {}//Default Constructor
+    virtual ~Cipher() {} //Distructor
     virtual void run() = 0; 
 };
 
@@ -90,7 +90,7 @@ public:
                 char changed = (char)(base + moved);
                 result = result + changed;
             } else {
-                result = result + c;
+                result = result + c;//Result is string of data
             }
         }
         writeFile(result);
@@ -135,7 +135,7 @@ public:
                 char changed = (char)(base + moved);
                 result = result + changed;
             } else {
-                result = result + c;
+                result = result + c;//Result is string of data
             }
         }
         writeFile(result);
