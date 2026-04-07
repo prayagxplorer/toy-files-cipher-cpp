@@ -50,22 +50,22 @@ protected:
 public:
     Cipher(string in, string out) : inputFileName(in), outputFileName(out) {}
     virtual ~Cipher() {}
-    virtual void run(bool encryptMode) = 0; 
+    virtual void run() = 0; 
 };
 
-// --- CAESAR CHILD CLASS ---
-class CaesarCipher : public Cipher {
+// --- CAESAR ENCRYPT CHILD CLASS ---
+class CaesarEncryptCipher : public Cipher {
 private:
     int shift;
 public:
-    CaesarCipher(string in, string out, int s) : Cipher(in, out), shift(s) {}
+    CaesarEncryptCipher(string in, string out, int s) : Cipher(in, out), shift(s) {}
 
-    void run(bool encryptMode) {
+    void run() {
         string data = readFile();
         if (data.empty()) return;
 
         string result = "";
-        int actualShift = encryptMode ? shift : (26 - (shift % 26));
+        int actualShift = shift;
 
         for (int i = 0; i < (int)data.length(); i++) {
             char c = data[i];
@@ -98,8 +98,53 @@ public:
     }
 };
 
-// --- VIGENERE CHILD CLASS ---
-class VigenereCipher : public Cipher {
+// --- CAESAR DECRYPT CHILD CLASS ---
+class CaesarDecryptCipher : public Cipher {
+private:
+    int shift;
+public:
+    CaesarDecryptCipher(string in, string out, int s) : Cipher(in, out), shift(s) {}
+
+    void run() {
+        string data = readFile();
+        if (data.empty()) return;
+
+        string result = "";
+        int actualShift = 26 - (shift % 26);
+
+        for (int i = 0; i < (int)data.length(); i++) {
+            char c = data[i];
+            if (isalpha((unsigned char)c)) {
+                bool upper = isupper((unsigned char)c) != 0;
+                char base;
+                if (upper) {
+                    base = 'A';
+                } else {
+                    base = 'a';
+                }
+
+                int normalized = c - base;
+                int moved = normalized + actualShift;
+                while (moved >= 26) {
+                    moved = moved - 26;
+                }
+                while (moved < 0) {
+                    moved = moved + 26;
+                }
+
+                char changed = (char)(base + moved);
+                result = result + changed;
+            } else {
+                result = result + c;
+            }
+        }
+        writeFile(result);
+        printf("Caesar processing complete.\n");
+    }
+};
+
+// --- VIGENERE ENCRYPT CHILD CLASS ---
+class VigenereEncryptCipher : public Cipher {
 private:
     string key;
     string formatKey(string k) {
@@ -114,11 +159,11 @@ private:
         return temp;
     }
 public:
-    VigenereCipher(string in, string out, string k) : Cipher(in, out) {
+    VigenereEncryptCipher(string in, string out, string k) : Cipher(in, out) {
         key = formatKey(k);
     }
 
-    void run(bool encryptMode) {
+    void run() {
         string text = readFile();
         if (text.empty()) return;
         if (key.empty()) {
@@ -142,12 +187,7 @@ public:
                 int shift = key[keyIdx % keyLen] - 'A';
 
                 int current = c - base;
-                int moved;
-                if (encryptMode) {
-                    moved = current + shift;
-                } else {
-                    moved = current - shift;
-                }
+                int moved = current + shift;
 
                 while (moved >= 26) {
                     moved = moved - 26;
@@ -168,14 +208,79 @@ public:
     }
 };
 
-// --- XOR CHILD CLASS ---
-class XorCipher : public Cipher {
+// --- VIGENERE DECRYPT CHILD CLASS ---
+class VigenereDecryptCipher : public Cipher {
+private:
+    string key;
+    string formatKey(string k) {
+        string temp = "";
+        for (int i = 0; i < (int)k.length(); i++) {
+            char c = k[i];
+            if (isalpha((unsigned char)c)) {
+                char up = (char)toupper((unsigned char)c);
+                temp = temp + up;
+            }
+        }
+        return temp;
+    }
+public:
+    VigenereDecryptCipher(string in, string out, string k) : Cipher(in, out) {
+        key = formatKey(k);
+    }
+
+    void run() {
+        string text = readFile();
+        if (text.empty()) return;
+        if (key.empty()) {
+            printf("Error: Keyword has no alphabetic characters.\n");
+            return;
+        }
+
+        string result = "";
+        int keyIdx = 0;
+        int keyLen = (int)key.length();
+
+        for (int i = 0; i < (int)text.length(); i++) {
+            char c = text[i];
+            if (isalpha((unsigned char)c)) {
+                char base;
+                if (isupper((unsigned char)c)) {
+                    base = 'A';
+                } else {
+                    base = 'a';
+                }
+                int shift = key[keyIdx % keyLen] - 'A';
+
+                int current = c - base;
+                int moved = current - shift;
+
+                while (moved >= 26) {
+                    moved = moved - 26;
+                }
+                while (moved < 0) {
+                    moved = moved + 26;
+                }
+
+                char outChar = (char)(base + moved);
+                result = result + outChar;
+                keyIdx++;
+            } else {
+                result = result + c;
+            }
+        }
+        writeFile(result);
+        printf("Vigenere processing complete.\n");
+    }
+};
+
+// --- XOR ENCRYPT CHILD CLASS ---
+class XorEncryptCipher : public Cipher {
 private:
     string key;
 public:
-    XorCipher(string in, string out, string k) : Cipher(in, out), key(k) {}
+    XorEncryptCipher(string in, string out, string k) : Cipher(in, out), key(k) {}
 
-    void run(bool encryptMode) {
+    void run() {
         string text = readFile();
         if (text.empty()) return;
         if (key.empty()) {
@@ -194,11 +299,37 @@ public:
         }
 
         writeFile(result);
-        if (encryptMode) {
-            printf("XOR encryption complete.\n");
-        } else {
-            printf("XOR decryption complete.\n");
+        printf("XOR encryption complete.\n");
+    }
+};
+
+// --- XOR DECRYPT CHILD CLASS ---
+class XorDecryptCipher : public Cipher {
+private:
+    string key;
+public:
+    XorDecryptCipher(string in, string out, string k) : Cipher(in, out), key(k) {}
+
+    void run() {
+        string text = readFile();
+        if (text.empty()) return;
+        if (key.empty()) {
+            printf("Error: Key cannot be empty.\n");
+            return;
         }
+
+        string result = "";
+        int keyLen = (int)key.length();
+
+        for (int i = 0; i < (int)text.length(); i++) {
+            unsigned char textChar = (unsigned char)text[i];
+            unsigned char keyChar = (unsigned char)key[i % keyLen];
+            char outChar = (char)(textChar ^ keyChar);
+            result = result + outChar;
+        }
+
+        writeFile(result);
+        printf("XOR decryption complete.\n");
     }
 };
 
@@ -219,38 +350,38 @@ int main() {
         switch (choice) {
             case 1: {
                 int s; cout << "Enter shift: "; cin >> s;
-                myCipher = new CaesarCipher(in, out, s);
-                myCipher->run(true);
+                myCipher = new CaesarEncryptCipher(in, out, s);
+                myCipher->run();
                 break;
             }
             case 2: {
                 int s; cout << "Enter shift: "; cin >> s;
-                myCipher = new CaesarCipher(in, out, s);
-                myCipher->run(false);
+                myCipher = new CaesarDecryptCipher(in, out, s);
+                myCipher->run();
                 break;
             }
             case 3: {
                 cout << "Enter Keyword: "; cin >> k;
-                myCipher = new VigenereCipher(in, out, k);
-                myCipher->run(true);
+                myCipher = new VigenereEncryptCipher(in, out, k);
+                myCipher->run();
                 break;
             }
             case 4: {
                 cout << "Enter Keyword: "; cin >> k;
-                myCipher = new VigenereCipher(in, out, k);
-                myCipher->run(false);
+                myCipher = new VigenereDecryptCipher(in, out, k);
+                myCipher->run();
                 break;
             }
             case 5: {
                 cout << "Enter Key: "; cin >> k;
-                myCipher = new XorCipher(in, out, k);
-                myCipher->run(true);
+                myCipher = new XorEncryptCipher(in, out, k);
+                myCipher->run();
                 break;
             }
             case 6: {
                 cout << "Enter Key: "; cin >> k;
-                myCipher = new XorCipher(in, out, k);
-                myCipher->run(false);
+                myCipher = new XorDecryptCipher(in, out, k);
+                myCipher->run();
                 break;
             }
             default: {
