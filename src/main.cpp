@@ -13,7 +13,7 @@ protected:
     string readfile(){
         FILE* filePtr = fopen(inputFileName.c_str(),"rb");
         if(filePtr == NULL){
-            printf("Error: Could not open input file.\n");
+            printf("Could not open input file.\n");
             return "";
         }
 
@@ -32,7 +32,7 @@ protected:
     void writefile(string content){
         FILE* filePtr = fopen(outputFileName.c_str(),"wb");
         if(filePtr == NULL){
-            printf("Error: Could not open output file.\n");
+            printf("Could not open output file.\n");
             return;
         }
 
