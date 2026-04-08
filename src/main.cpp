@@ -95,7 +95,6 @@ public:
             }
         }
         writefile(result);
-        printf("Caesar processing complete.\n");
     }
 };
 
@@ -142,7 +141,6 @@ public:
             }
         }
         writefile(result);
-        printf("Caesar processing complete.\n");
     }
 };
 
@@ -169,7 +167,7 @@ public:
         string text = readfile();
         if(text.empty()) return;
         if(key.empty()){
-            printf("Error: Keyword has no alphabetic characters.\n");
+            printf("Keyword has no alphabetic characters.\n");
             return;
         }
 
@@ -206,7 +204,6 @@ public:
             }
         }
         writefile(result);
-        printf("Vigenere processing complete.\n");
     }
 };
 
@@ -233,7 +230,7 @@ public:
         string text = readfile();
         if(text.empty()) return;
         if(key.empty()){
-            printf("Error: Keyword has no alphabetic characters.\n");
+            printf("Keyword have no alphabetic characters.\n");
             return;
         }
 
@@ -270,7 +267,7 @@ public:
             }
         }
         writefile(result);
-        printf("Vigenere processing complete.\n");
+        
     }
 };
 
@@ -286,7 +283,7 @@ public:
         string text = readfile();
         if(text.empty()) return;
         if(key.empty()){
-            printf("Error: Key cannot be empty.\n");
+            printf("Key cannot be empty.\n");
             return;
         }
 
@@ -301,7 +298,7 @@ public:
         }
 
         writefile(result);
-        printf("XOR encryption complete.\n");
+        
     }
 };
 
@@ -317,7 +314,7 @@ public:
         string text = readfile();
         if(text.empty()) return;
         if(key.empty()){
-            printf("Error: Key cannot be empty.\n");
+            printf("Key cannot be empty.\n");
             return;
         }
 
@@ -332,7 +329,7 @@ public:
         }
 
         writefile(result);
-        printf("XOR decryption complete.\n");
+        
     }
 };
 
