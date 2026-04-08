@@ -44,7 +44,10 @@ protected:
     }
 
 public:
-    cipher(string in,string out) : inputFileName(in), outputFileName(out) {}
+    cipher(string in,string out) {
+        inputFileName = in;
+        outputFileName = out;
+    }
     virtual ~cipher() {}
     virtual void run() = 0;
 };
@@ -53,7 +56,9 @@ class caesarencryptcipher : public cipher{
 private:
     int shift;
 public:
-    caesarencryptcipher(string in,string out,int s) : cipher(in,out), shift(s) {}
+    caesarencryptcipher(string in,string out,int s) : cipher(in,out) {
+        shift = s;
+    }
 
     void run(){
         string data = readfile();
@@ -98,7 +103,9 @@ class caesardecryptcipher : public cipher{
 private:
     int shift;
 public:
-    caesardecryptcipher(string in,string out,int s) : cipher(in,out), shift(s) {}
+    caesardecryptcipher(string in,string out,int s) : cipher(in,out) {
+        shift = s;
+    }
 
     void run(){
         string data = readfile();
@@ -377,7 +384,7 @@ int main(){
             case 6:{
                 cout << "Enter Key: "; cin >> k;
                 myCipher = new xordecryptcipher(in,out,k);
-                myCipher->run();
+                 myCipher->run();
                 break;
             }
             default:{
